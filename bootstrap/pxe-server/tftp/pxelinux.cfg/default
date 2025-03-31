@@ -1,4 +1,16 @@
 DEFAULT install
+PROMPT 1
+TIMEOUT 50
+ONTIMEOUT install
+
 LABEL install
-    KERNEL /boot/linux26
-    APPEND vga=normal initrd=/boot/initrd.gz auto=true priority=critical preseed/url=http://192.168.10.206:8080/preseed.cfg
+    MENU LABEL ^Install Proxmox VE
+    KERNEL vmlinuz
+    INITRD initrd.img
+    APPEND boot=live components quiet splash
+
+LABEL shell
+    MENU LABEL ^Rescue Shell
+    KERNEL vmlinuz
+    INITRD initrd.img
+    APPEND boot=live components quiet nosplash

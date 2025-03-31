@@ -1,7 +1,10 @@
 ---
 - name: Setup PXE Boot Server
   hosts: localhost
-  become: false
+  connection: local
+  gather_facts: yes
+  vars:
+    pxe_server_ip: "{{ ansible_default_ipv4.address }}"
 
   tasks:
     - name: Ensure folder structure exists
@@ -9,10 +12,58 @@
         path: "{{ item }}"
         state: directory
       loop:
-        - "./http"
-        - "./tftp/pxelinux.cfg"
+        - ./http
+        - ./tftp/pxelinux.cfg
+
+    - name: Write default PXE boot menu
+      copy:
+        dest: ./tftp/pxelinux.cfg/default
+        content: |
+          DEFAULT install
+          PROMPT 1
+          TIMEOUT 50
+          ONTIMEOUT install
+
+          LABEL install
+              MENU LABEL ^Install Proxmox VE
+              KERNEL vmlinuz
+              INITRD initrd.img
+              APPEND boot=live components quiet splash
+
+          LABEL shell
+              MENU LABEL ^Rescue Shell
+              KERNEL vmlinuz
+              INITRD initrd.img
+              APPEND boot=live components quiet nosplash
+
+    - name: Download iPXE bootloaders (undionly.kpxe and ipxe.efi)
+      get_url:
+        url: "{{ item.url }}"
+        dest: "{{ item.dest }}"
+        mode: '0644'
+      loop:
+        - { url: "https://boot.ipxe.org/undionly.kpxe", dest: "./tftp/undionly.kpxe" }
+        - { url: "https://boot.ipxe.org/ipxe.efi", dest: "./tftp/ipxe.efi" }
+
+    - name: Create Proxmox iPXE boot script
+      copy:
+        dest: ./http/proxmox.ipxe
+        content: |
+          #!ipxe
+          
+          kernel http://{{ pxe_server_ip }}:8080/vmlinuz
+          initrd http://{{ pxe_server_ip }}:8080/initrd.img
+          boot
+        mode: '0644'
+
     - name: Start PXE services using modern Docker Compose (CLI v2)
-      ansible.builtin.command:
-        cmd: docker compose up -d
-      args:
-        chdir: "{{ playbook_dir }}/compose"
+      command:
+        cmd: docker compose -f ./compose/docker-compose.yml up -d
+      register: result
+      failed_when: result.rc != 0
+
+    # Optional - uncomment if needed to restart after bootloader changes
+    # - name: Restart PXE services
+    #   command: docker compose restart
+    #   args:
+    #     chdir: ./compose

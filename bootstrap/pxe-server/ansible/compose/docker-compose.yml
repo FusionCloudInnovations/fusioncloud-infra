@@ -9,11 +9,10 @@ services:
     restart: unless-stopped
 
   tftp:
-    image: panubo/tftp
+    image: pghalliday/tftp
     container_name: tftp
     volumes:
-      - ./tftp:/srv/tftp
+      - ./tftp:/var/tftpboot
     ports:
       - "69:69/udp"
-    command: --verbose --create --secure /srv/tftp
     restart: unless-stopped

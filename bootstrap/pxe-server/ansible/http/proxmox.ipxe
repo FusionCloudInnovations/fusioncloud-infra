@@ -1,0 +1,5 @@
+#!ipxe
+
+kernel http://172.25.7.126:8080/vmlinuz
+initrd http://172.25.7.126:8080/initrd.img
+boot
