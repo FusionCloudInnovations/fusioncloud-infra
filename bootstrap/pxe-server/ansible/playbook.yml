@@ -1,0 +1,17 @@
+---
+- name: Setup PXE Boot Server
+  hosts: localhost
+  become: false
+
+  tasks:
+    - name: Ensure folder structure exists
+      file:
+        path: "{{ item }}"
+        state: directory
+      loop:
+        - "./http"
+        - "./tftp/pxelinux.cfg"
+    - name: Start PXE services via Docker Compose
+      community.docker.docker_compose:
+        project_src: "{{ playbook_dir }}"
+        

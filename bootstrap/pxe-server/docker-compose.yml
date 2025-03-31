@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  tftp:
+    image: atmoz/tftp
+    container_name: pxe-tftp
+    ports:
+      - "69:69/udp"
+    volumes:
+      - ./tftp:/var/tftpboot
+  http:
+    image: python:3
+    container_name: pxe-http
+    ports:
+      - "8080:80"
+    working_dir: /http
+    volumes:
+      - ./http:/http
+    command: ["python3", "-m", "http.server", "80"]
