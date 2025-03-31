@@ -2,21 +2,22 @@
 - name: Setup PXE Boot Server
   hosts: localhost
   connection: local
-  gather_facts: yes
+  gather_facts: true
   vars:
     pxe_server_ip: "{{ ansible_default_ipv4.address }}"
 
   tasks:
     - name: Ensure folder structure exists
-      file:
+      ansible.builtin.file:
         path: "{{ item }}"
         state: directory
+        mode: "0755"
       loop:
         - ./http
         - ./tftp/pxelinux.cfg
 
     - name: Write default PXE boot menu
-      copy:
+      ansible.builtin.copy:
         dest: ./tftp/pxelinux.cfg/default
         content: |
           DEFAULT install
@@ -35,35 +36,43 @@
               KERNEL vmlinuz
               INITRD initrd.img
               APPEND boot=live components quiet nosplash
+        mode: "0644"
 
     - name: Download iPXE bootloaders (undionly.kpxe and ipxe.efi)
-      get_url:
+      ansible.builtin.get_url:
         url: "{{ item.url }}"
         dest: "{{ item.dest }}"
-        mode: '0644'
+        mode: "0644"
+        force: false
       loop:
         - { url: "https://boot.ipxe.org/undionly.kpxe", dest: "./tftp/undionly.kpxe" }
         - { url: "https://boot.ipxe.org/ipxe.efi", dest: "./tftp/ipxe.efi" }
 
     - name: Create Proxmox iPXE boot script
-      copy:
+      ansible.builtin.copy:
         dest: ./http/proxmox.ipxe
         content: |
           #!ipxe
-          
           kernel http://{{ pxe_server_ip }}:8080/vmlinuz
           initrd http://{{ pxe_server_ip }}:8080/initrd.img
           boot
-        mode: '0644'
+        mode: "0644"
+
+    - name: Check if Docker Compose services are running
+      ansible.builtin.command:
+        cmd: docker compose -f ./compose/docker-compose.yml ps --status running
+      register: compose_status
+      changed_when: false
 
     - name: Start PXE services using modern Docker Compose (CLI v2)
-      command:
+      ansible.builtin.command:
         cmd: docker compose -f ./compose/docker-compose.yml up -d
       register: result
+      changed_when: compose_status.rc != 0
       failed_when: result.rc != 0
 
     # Optional - uncomment if needed to restart after bootloader changes
     # - name: Restart PXE services
-    #   command: docker compose restart
-    #   args:
+    #   ansible.builtin.command:
+    #     cmd: docker compose restart
     #     chdir: ./compose
