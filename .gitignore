@@ -1,0 +1,49 @@
+# OS-specific
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# Python HTTP server cache
+__pycache__/
+*.pyc
+
+# Docker volumes / logs
+*.log
+*.pid
+
+# Terraform local state
+*.tfstate
+*.tfstate.backup
+.terraform/
+crash.log
+
+# Ansible artifacts
+*.retry
+*.tar.gz
+*.orig
+
+# Proxmox ISO (DO NOT COMMIT)
+http/proxmox-ve.iso
+
+# Kernel/initrd extracted from ISO
+tftp/boot/vmlinuz
+tftp/boot/initrd.gz
+
+# PXE temp mount points (if created)
+mnt/
+tmp/
+
+# VSCode / Editor
+.vscode/
+.idea/
+
+# Windows
+*.lnk
+*.bak
+*.tmp
+
+# GitHub Actions runtime data
+.env
+*.secrets
+bootstrap/pxe-server/http/proxmox-ve.iso

@@ -1,0 +1,20 @@
+version: "3.8"
+
+services:
+  http:
+    image: httpd:2.4-alpine
+    container_name: http
+    volumes:
+      - ./http:/usr/local/apache2/htdocs/
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+
+  tftp:
+    image: pghalliday/tftp
+    container_name: tftp
+    volumes:
+      - ./tftp:/var/tftpboot
+    ports:
+      - "69:69/udp"
+    restart: unless-stopped
