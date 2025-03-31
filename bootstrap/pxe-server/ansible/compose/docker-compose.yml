@@ -1,19 +1,19 @@
-version: '3.8'
-
 services:
-  tftp:
-    image: atmoz/tftp
-    container_name: pxe-tftp
-    ports:
-      - "69:69/udp"
-    volumes:
-      - ./tftp:/var/tftpboot
   http:
-    image: python:3
-    container_name: pxe-http
+    image: httpd:2.4-alpine
+    container_name: http
+    volumes:
+      - ./http:/usr/local/apache2/htdocs/
     ports:
       - "8080:80"
-    working_dir: /http
+    restart: unless-stopped
+
+  tftp:
+    image: panubo/tftp
+    container_name: tftp
     volumes:
-      - ./http:/http
-    command: ["python3", "-m", "http.server", "80"]
+      - ./tftp:/srv/tftp
+    ports:
+      - "69:69/udp"
+    command: --verbose --create --secure /srv/tftp
+    restart: unless-stopped
