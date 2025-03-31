@@ -1,7 +1,3 @@
-Here’s a clean and minimal update for your PXE Server’s `README.md` based on the current state of the project:
-
----
-
 ### 📡 PXE Boot Server – Ansible + Docker Compose
 
 This project provisions a PXE boot server using Ansible and modern Docker Compose (v2). It supports booting Proxmox VE on bare-metal machines (e.g. Lenovo M92) without requiring local installation media or direct input devices.
@@ -44,7 +40,4 @@ ansible-playbook ansible/playbook.yml
 - You must configure your DHCP server (e.g. UDM Pro) to serve:
   - BIOS clients: `undionly.kpxe`
   - UEFI clients: `ipxe.efi`
-
----
-
-Want me to commit this into `README.md` and add it to your open PR?
+  - 
