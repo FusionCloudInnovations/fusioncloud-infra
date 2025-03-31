@@ -46,3 +46,4 @@ tmp/
 # GitHub Actions runtime data
 .env
 *.secrets
+bootstrap/pxe-server/http/proxmox-ve.iso
